@@ -1,0 +1,26 @@
+services:
+  web-fetch-proxy-flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    container_name: flaresolverr
+    environment:
+      - LOG_LEVEL=info
+      - CAPTCHA_SOLVER=none
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+
+  web-fetch-proxy:
+    build: .
+    container_name: web-fetch-proxy
+    ports:
+      - "127.0.0.1:1803:1803"
+    environment:
+      - PORT=1803
+      - FLARESOLVERR_HOST=flaresolverr
+      - FLARESOLVERR_PORT=8191
+      - PROXY_URL=http://host.docker.internal:1801
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - web-fetch-proxy-flaresolverr
+    restart: unless-stopped
